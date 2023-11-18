@@ -1,28 +1,45 @@
 'use client'
 
-import { useEffect } from "react"
+import { use, useCallback, useEffect, useState } from "react"
 import { Button } from "../button"
 import { TbArrowNarrowUp } from "react-icons/tb"
+import { AnimatePresence, motion } from "framer-motion"
 
 export const BackToTop = () => {
+    const [show, setShow] = useState(false)
+
     const scrollToTop = () => {
-        window.scrollTo({top: 0, behavior: 'smooth'})
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
     }
 
+    const handleScroll = useCallback(() => {
+        if (!show && window.scrollY > 500) setShow(true)
+        if (show && window.scrollY <= 500) setShow(false)
+    }, [show])
+    
     useEffect(() => {
-        window.addEventListener('scroll', () => {
-            if(window.scrollY < 300) {
-                document.querySelector('#back-to-top')?.classList.add('hidden')
-            } else {
-                document.querySelector('#back-to-top')?.classList.remove('hidden')
-            }
-        })
-    })
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [handleScroll])
+
     return(
-        <div className="fixed right-4 bottom-4 z-20">
-            <Button id="back-to-top" className="hidden shadow-lg shadow-emerald-400/20" onClick={scrollToTop}>
-                <TbArrowNarrowUp size={18} />
-            </Button>
-        </div>
+        <AnimatePresence>
+            {show && (
+                <motion.div 
+                    className="fixed right-4 bottom-4 z-20"
+                    initial={{ opacity: 0, right: -10 }}
+                    animate={{ opacity: 1, right: 16 }}
+                    exit={{ opacity: 0, right: -10 }}
+                >
+                    <Button className="shadow-lg shadow-emerald-400/20" onClick={scrollToTop}>
+                        <TbArrowNarrowUp size={18} />
+                    </Button>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
+    
 }

@@ -6,6 +6,9 @@ import { SectionTitle } from "../section-title";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
 
 const contactFormSchema = z.object({
   name: z.string().min(3).max(100),
@@ -16,12 +19,18 @@ const contactFormSchema = z.object({
 type ContactFormData = z.infer<typeof contactFormSchema>;
 
 export const ContactForm = () => {
-  const { register, handleSubmit } = useForm<ContactFormData>({
+  const { register, handleSubmit, reset, formState : { isSubmitting, errors} } = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
   });
 
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const onSubmit = async (data: ContactFormData) => {
+    try{
+      await axios.post("/api/contact", data)
+      toast.success("Mensagem enviada com sucesso")
+      reset()
+    }catch(error){
+      toast.error("Ocorreu um erro ao enviar a mensagem")
+    }
   };
 
   return (
@@ -32,10 +41,14 @@ export const ContactForm = () => {
           subtitle="contato"
           className="text-center items-center"
         />
-        <form
+        <motion.form
           action=""
           className="mt-12 w-full flex flex-col gap-4"
           onSubmit={handleSubmit(onSubmit)}
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          transition={{ duration: 0.5 }}
         >
           <input
             type="text"
@@ -55,11 +68,11 @@ export const ContactForm = () => {
             maxLength={500}
             {...register("message")}
           ></textarea>
-          <Button className="w-max mx-auto mt-6 shadow-button">
+          <Button className="w-max mx-auto mt-6 shadow-button" disabled={isSubmitting}>
             Enviar Mensagem
             <HiArrowNarrowRight size={18} />
           </Button>
-        </form>
+        </motion.form>
       </div>
     </section>
   );

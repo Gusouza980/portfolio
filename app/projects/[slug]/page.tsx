@@ -11,10 +11,6 @@ type ProjectProps = {
     }
 }
 
-export const metadata = {
-    title: 'Projeto - Template Portfolio',
-}
-
 const getProjectDetails = async (slug : string): Promise<ProjectPageData> => {
     const query = `
       query ProjectDetailsQuery {
